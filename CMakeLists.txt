@@ -22,7 +22,7 @@ target_include_directories(stb_image SYSTEM PUBLIC third_party/stb)
 
 find_package(OpenGL REQUIRED)
 
-add_executable(hello_window
+add_executable(dickman
   "src/uniform.cpp"
   "src/camera/Camera.cpp"
   "src/camera/Camera.h"
@@ -36,10 +36,10 @@ add_executable(hello_window
   "src/texture/Texture2D.h"
   "src/math/GraphicsMath.h"
 )
-target_link_libraries(hello_window PRIVATE glfw glad stb_image OpenGL::GL)
+target_link_libraries(dickman PRIVATE glfw glad stb_image OpenGL::GL)
 
-target_compile_features(hello_window PRIVATE cxx_std_17)
-target_compile_definitions(hello_window PRIVATE
+target_compile_features(dickman PRIVATE cxx_std_17)
+target_compile_definitions(dickman PRIVATE
   HELLO_SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shaders"
   HELLO_TEXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets/textures"
 )
@@ -49,7 +49,7 @@ file(GLOB_RECURSE SHADER_FILES CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.geom"
 )
 set_source_files_properties(${SHADER_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
-target_sources(hello_window PRIVATE ${SHADER_FILES})
+target_sources(dickman PRIVATE ${SHADER_FILES})
 
 # 为 src 下的每个头文件目录添加搜索路径，支持 #include <Camera.h>。
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
@@ -69,11 +69,11 @@ foreach(PROJECT_HEADER IN LISTS PROJECT_HEADERS)
   list(APPEND PROJECT_HEADER_DIRS "${PROJECT_HEADER_DIR}")
 endforeach()
 list(REMOVE_DUPLICATES PROJECT_HEADER_DIRS)
-target_include_directories(hello_window PRIVATE ${PROJECT_HEADER_DIRS})
+target_include_directories(dickman PRIVATE ${PROJECT_HEADER_DIRS})
 
-# MSVC 按 UTF-8 读取源文件；第三方库静态链接，不需要单独部署 GLFW DLL。
+# Windows 下默认输出到 build/Debug，DLL 版 glfw 会自动被拷贝
 if (MSVC)
-  target_compile_options(hello_window PRIVATE /W4 /utf-8)
+  target_compile_options(dickman PRIVATE /W4 /utf-8)
 endif()
 
 ## ── ① 契约与身份 ──
