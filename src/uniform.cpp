@@ -106,10 +106,12 @@ main()
             VertexArray::unbind();
 
             Texture2D texture{HELLO_TEXTURE_DIR "/uv-test.png"};
+            Texture2D specularTexture{HELLO_TEXTURE_DIR "/specular-mask.png"};
 
             std::cout << "Texture loaded: " << texture.getWidth()
                       << "x" << texture.getHeight() << std::endl;
             shader.setInt("imageTexture", 0);
+            shader.setInt("specularMap", 1);
 
             Camera camera{Vec3{0.0f, 0.0f, 5.0f}};
 
@@ -213,6 +215,8 @@ main()
                 shader.setVec3("cameraPos", camera.getPosition());
                 texture.bind(0);
                 shader.setInt("imageTexture", 0);
+                specularTexture.bind(1);
+                shader.setInt("specularMap", 1);
                 shader.setFloat("lightIntensity", 2.0f);
                 vertexArray.bind();
                 glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
