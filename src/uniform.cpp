@@ -139,9 +139,9 @@ main()
                 float angle = currentFrame*angularSpeed;
 
                 Vec3 lightPos{
-                    radius * std::cos(angle),
+                    8,
                     8.0f,
-                    radius * std::sin(angle)
+                    8
                 };
                 float deltaTime = currentFrame - lastFrame;
                 lastFrame = currentFrame;
@@ -212,6 +212,7 @@ main()
                 shader.setMat4("transform", mvp);
                 shader.setMat4("model", model);
                 shader.setVec3("lightPos", lightPos);
+                shader.setVec3("cameraPos", camera.getPosition());
                 texture.bind(0);
                 shader.setInt("imageTexture", 0);
                 vertexArray.bind();
