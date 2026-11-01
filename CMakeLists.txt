@@ -4,19 +4,13 @@ project(hello_window LANGUAGES C CXX)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-include(FetchContent)
-
-# GLFW 源码预置在本地（../third_party/glfw），不使用网络下载。
-# 首次获取方式：
-#   git clone https://github.com/glfw/glfw.git --branch 3.4 --depth 1 D:/VisionUpUp/Study/third_party/glfw
-FetchContent_Declare(
-  glfw
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/glfw
-)
+# 所有第三方源码均随仓库提供；配置阶段不联网，也不依赖仓库外目录。
+set(GLFW_LIBRARY_TYPE STATIC CACHE STRING "Build bundled GLFW statically" FORCE)
 set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(glfw)
+set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
+add_subdirectory(third_party/glfw)
 
 # glad: 去 https://glad.dav1d.de 生成（GL 4.6 / Core / C-C++），
 # 把 zip 里的 include/ 和 src/glad.c 放到 third_party/glad/ 下
@@ -77,7 +71,7 @@ endforeach()
 list(REMOVE_DUPLICATES PROJECT_HEADER_DIRS)
 target_include_directories(hello_window PRIVATE ${PROJECT_HEADER_DIRS})
 
-# Windows 下默认输出到 build/Debug，DLL 版 glfw 会自动被拷贝
+# MSVC 按 UTF-8 读取源文件；第三方库静态链接，不需要单独部署 GLFW DLL。
 if (MSVC)
   target_compile_options(hello_window PRIVATE /W4 /utf-8)
 endif()

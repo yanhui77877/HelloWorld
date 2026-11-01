@@ -12,23 +12,36 @@ C++17 / OpenGL 3.3 Core 学习项目。目前包含贴图立方体、飞行相�
 - `src/math`：向量和矩阵计算。
 - `shaders`：GLSL 顶点、片段着色器。
 - `assets/textures`：纹理图片及学习说明。
-- `third_party`：随项目保存的 GLAD 和 stb_image。
+- `third_party`：随项目保存的 GLFW 3.4、GLAD 和 stb_image，全部从本地源码构建。
 
 ## 构建
 
 需要支持 OpenGL 3.3 的显卡驱动、CMake 3.24 或更新版本，以及支持 C++17 的编译器。Windows 可使用 Visual Studio 的“使用 C++ 的桌面开发”工作负载和 CMake 支持。
 
-当前 CMake 使用项目旁边的 `../third_party/glfw`，因此先准备 GLFW 3.4：
+第三方库已经完整纳入仓库，无需另行下载、设置库目录、运行子模块命令，也不依赖任何仓库外的 `third_party` 目录。
+
+### Visual Studio 2022 / 2026
+
+1. 安装“使用 C++ 的桌面开发”工作负载，包括 Windows SDK、MSVC、CMake 和 Ninja 工具。
+2. 克隆仓库，用 VS 的“打开文件夹”打开包含 CMakeLists.txt 的仓库根目录。
+3. 选择 `Windows x64 Debug` 配置预设，等待 CMake 配置完成。
+4. 启动项选择 `hello_window.exe`，生成并运行。
+
+若旧目录曾因缺少 GLFW 配置失败，使用“删除缓存并重新配置”，或切换到新增的预设。不要复制其他目录的 out 或 .vs 缓存。
+
+### 命令行
+
+在 Visual Studio 的 x64 Native Tools 命令提示符中执行：
 
 ```powershell
-# 在 HelloWorld 仓库根目录执行；如果 GLFW 已存在，无需重复克隆。
-git clone --branch 3.4 --depth 1 https://github.com/glfw/glfw.git ../third_party/glfw
-
-cmake -S . -B build
-cmake --build build --config Debug
+git clone https://github.com/yanhui77877/HelloWorld.git
+cd HelloWorld
+cmake --preset windows-debug
+cmake --build --preset windows-debug
+.\out\build\windows-debug\hello_window.exe
 ```
 
-Visual Studio 也可以直接“打开文件夹”，选择当前仓库并构建 `hello_window` 目标。程序入口当前是 `uniform.cpp`。
+也可以使用其他本机 CMake 生成器：`cmake -S . -B build`，然后 `cmake --build build --config Debug`。程序入口当前是 `uniform.cpp`。
 
 开发时资源路径由 CMake 定位到仓库中的 `shaders` 和 `assets/textures`，与程序启动目录无关。移动仓库后重新配置 CMake；发布独立程序时需要另行部署资源。
 
