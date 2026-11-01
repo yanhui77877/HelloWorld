@@ -111,7 +111,6 @@ main()
                       << "x" << texture.getHeight() << std::endl;
             shader.setInt("imageTexture", 0);
 
-
             Camera camera{Vec3{0.0f, 0.0f, 5.0f}};
 
             float lastFrame = (float)glfwGetTime();
@@ -122,7 +121,6 @@ main()
             double lastMouseY = 0.0;
             bool firstMouse = true;
             bool reloadWasPressed = false;
-
 
             while (!glfwWindowShouldClose(window))
             {
@@ -138,11 +136,10 @@ main()
                 float angularSpeed = 1.0f;
                 float angle = currentFrame*angularSpeed;
 
-                Vec3 lightPos{
-                    8,
-                    8.0f,
-                    8
-                };
+                float radiusLight = 2.0f;
+
+                Vec3 lightPos{ radiusLight*std::cos(angle), 2.0f, radiusLight *std::sin(angle) };
+                Vec3 lightColour{ 1.0f, 0.5f, 0.2f }; 
                 float deltaTime = currentFrame - lastFrame;
                 lastFrame = currentFrame;
 
@@ -212,9 +209,11 @@ main()
                 shader.setMat4("transform", mvp);
                 shader.setMat4("model", model);
                 shader.setVec3("lightPos", lightPos);
+                shader.setVec3("lightColour", lightColour);
                 shader.setVec3("cameraPos", camera.getPosition());
                 texture.bind(0);
                 shader.setInt("imageTexture", 0);
+                shader.setFloat("lightIntensity", 2.0f);
                 vertexArray.bind();
                 glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
                 VertexArray::unbind();

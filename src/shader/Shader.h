@@ -7,7 +7,8 @@
 class Shader
 {
 public:
-    Shader(
+    Shader
+    (
         const std::string& vertexPath,
         const std::string& fragmentPath,
         const std::string& geometryPath = {}
@@ -24,13 +25,20 @@ public:
     use() const;
 
     void 
-    setVec3(const char* name, const Vec3& vector) const;
+    setVec3(const char* name, 
+            const Vec3& vector) const;
 
     void 
-    setMat4(const char* name, const Mat4& matrix) const;
+    setMat4(const char* name, 
+            const Mat4& matrix) const;
 
     void 
-    setInt(const char* name, int value) const;
+    setInt(const char* name, 
+           int value) const;
+
+    void 
+    setFloat(const char* name, 
+             float value) const;
 
     bool 
     reload();

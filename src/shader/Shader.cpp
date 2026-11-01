@@ -120,7 +120,8 @@ Shader::setVec3(const char* name, const Vec3& vector) const
 }
 
 void 
-Shader::setMat4(const char* name, const Mat4& matrix) const
+Shader::setMat4(const char* name, 
+                const Mat4& matrix) const
 {
     use();
     GLint location = glGetUniformLocation(id, name);
@@ -128,11 +129,21 @@ Shader::setMat4(const char* name, const Mat4& matrix) const
 }
 
 void 
-Shader::setInt(const char* name, int value) const
+Shader::setInt(const char* name, 
+               int value) const
 {
     use();
     GLint location = glGetUniformLocation(id, name);
     glUniform1i(location, value);
+}
+
+void 
+Shader::setFloat(const char* name, 
+                 float value) const
+{
+    use();
+    GLint location = glGetUniformLocation(id, name);
+    glUniform1f(location, value);
 }
 
 bool 
