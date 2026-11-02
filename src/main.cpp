@@ -8,6 +8,7 @@
 #include <VertexArray.h>
 #include <Shader.h>
 #include <Texture2D.h>
+#include <Light.h>
 
 int
 main()
@@ -40,10 +41,8 @@ main()
 
     try
     {
-        Shader shader{
-            HELLO_SHADER_DIR "/basic.vert",
-            HELLO_SHADER_DIR "/basic.frag"
-        };
+        Shader shader{ HELLO_SHADER_DIR "/basic.vert", HELLO_SHADER_DIR "/basic.frag" };
+        Shader lightShader{ HELLO_SHADER_DIR "/light.vert", HELLO_SHADER_DIR "/light.frag" };
 
         GLuint indices[] =
         {
@@ -130,7 +129,10 @@ main()
 
                 bool reloadPressed = glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS;
                 if (reloadPressed && !reloadWasPressed)
+                {
                     shader.reload();
+                    lightShader.reload();
+                }
                 reloadWasPressed = reloadPressed;
 
                 float currentFrame = (float)glfwGetTime();
@@ -142,6 +144,9 @@ main()
 
                 Vec3 lightPos{ radiusLight*std::cos(angle), 2.0f, radiusLight *std::sin(angle) };
                 Vec3 lightColour{ 1.0f, 0.5f, 0.2f }; 
+				Light light{ lightPos, lightColour, 2.0f };
+                Light secondLight{ Vec3{ -2.0f, -1.0f, 2.0f }, Vec3{ 0.15f, 0.4f, 1.0f }, 1.5f };
+
                 float deltaTime = currentFrame - lastFrame;
                 lastFrame = currentFrame;
 
@@ -210,16 +215,31 @@ main()
 
                 shader.setMat4("transform", mvp);
                 shader.setMat4("model", model);
-                shader.setVec3("lightPos", lightPos);
-                shader.setVec3("lightColour", lightColour);
+                shader.setVec3("lightPos", light.getPosition());
+                shader.setVec3("lightColour", light.getColor());
                 shader.setVec3("cameraPos", camera.getPosition());
                 texture.bind(0);
                 shader.setInt("imageTexture", 0);
                 specularTexture.bind(1);
                 shader.setInt("specularMap", 1);
-                shader.setFloat("lightIntensity", 2.0f);
+                shader.setFloat("lightIntensity", light.getIntensity());
+                shader.setVec3("secondLightPos", secondLight.getPosition());
+                shader.setVec3("secondLightColour", secondLight.getColor());
+                shader.setFloat("secondLightIntensity", secondLight.getIntensity());
                 vertexArray.bind();
                 glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+                for (const Light* visibleLight: { &light, &secondLight } )
+                {
+                    Vec3 position = visibleLight->getPosition();
+                    Mat4 lightModel = Mat4::multiply(Mat4::translate(position.x, position.y, position.z), Mat4::scale(0.1f));
+                    Mat4 lightMvp = Mat4::multiply( projection, Mat4::multiply(view, lightModel));
+
+                    lightShader.setMat4("transform", lightMvp);
+                    lightShader.setVec3("lightColour", visibleLight->getColor());
+                    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+                }
+
                 VertexArray::unbind();
                 glfwSwapBuffers(window);
             }

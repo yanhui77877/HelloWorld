@@ -31,7 +31,7 @@
     {
       "name": "windows-debug",
       "configurePreset": "windows-debug",
-      "targets": ["hello_window"]
+      "targets": [ "dickman" ]
     }
   ]
 }

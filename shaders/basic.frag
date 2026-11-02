@@ -6,27 +6,26 @@ in vec3 vWorldNormal;
 
 uniform sampler2D imageTexture;
 uniform sampler2D specularMap;
+uniform vec3 cameraPos;
+
 uniform vec3 lightPos;
 uniform vec3 lightColour;
-uniform vec3 cameraPos;
 uniform float lightIntensity;
+
+uniform vec3 secondLightPos;
+uniform vec3 secondLightColour;
+uniform float secondLightIntensity;
 
 out vec4 color;
 
-void 
-main() 
+vec3
+calculatePointLight(vec3 position, vec3 lightColor, float intensity,
+                    vec3 N, vec3 V, vec3 baseColor, float specularMask)
 {
-  vec3 N = normalize(vWorldNormal);
-  vec3 L = normalize(lightPos - vWorldPosition);
-  float distance = length(lightPos - vWorldPosition);
-  vec3 V = normalize(cameraPos - vWorldPosition);
+  vec3 L = normalize(position - vWorldPosition);
+  float distance = length(position - vWorldPosition);
 
   float diffuse = max(dot(N, L), 0.0);
-  vec4 baseColor = texture(imageTexture, vTexCoord);
-  float specularMask = texture(specularMap, vTexCoord).r;
-
-  float ambientStrength = 0.25;
-  vec3 ambientColor = vec3(1.0);
 
   float specular = 0.0f;
 
@@ -40,11 +39,29 @@ main()
 
   float specularStrength = 1.f;
 
-  vec3 finalAmbient  = baseColor.rgb*ambientStrength*ambientColor;
-  vec3 finalDiffuse  = baseColor.rgb*vec3(diffuse)*lightColour;
-  vec3 finalSpecular = specularStrength*specularMask*specular*lightColour;
+  vec3 finalDiffuse  = baseColor*diffuse*lightColor;
+  vec3 finalSpecular = specularStrength*specularMask*specular*lightColor;
 
-  vec3 result = finalAmbient + attenuation*lightIntensity*(finalDiffuse + finalSpecular);
+  return attenuation*intensity*(finalDiffuse + finalSpecular);
+}
+
+void
+main()
+{
+  vec3 N = normalize(vWorldNormal);
+  vec3 V = normalize(cameraPos - vWorldPosition);
+  vec4 baseColor = texture(imageTexture, vTexCoord);
+  float specularMask = texture(specularMap, vTexCoord).r;
+
+  float ambientStrength = 0.25;
+  vec3 ambientColor = vec3(1.0);
+  vec3 finalAmbient = baseColor.rgb*ambientStrength*ambientColor;
+
+  vec3 result = finalAmbient
+      + calculatePointLight(lightPos, lightColour, lightIntensity,
+                            N, V, baseColor.rgb, specularMask)
+      + calculatePointLight(secondLightPos, secondLightColour, secondLightIntensity,
+                            N, V, baseColor.rgb, specularMask);
 
   color = vec4(result, baseColor.a);
 }

@@ -23,7 +23,7 @@ target_include_directories(stb_image SYSTEM PUBLIC third_party/stb)
 find_package(OpenGL REQUIRED)
 
 add_executable(dickman
-  "src/uniform.cpp"
+  "src/main.cpp"
   "src/camera/Camera.cpp"
   "src/camera/Camera.h"
   "src/buffer/Buffer.cpp"
@@ -35,6 +35,8 @@ add_executable(dickman
   "src/texture/Texture2D.cpp"
   "src/texture/Texture2D.h"
   "src/math/GraphicsMath.h"
+  "src/light/Light.h"
+  "src/light/Light.cpp"
 )
 target_link_libraries(dickman PRIVATE glfw glad stb_image OpenGL::GL)
 

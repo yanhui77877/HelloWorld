@@ -16,5 +16,6 @@ void main() {
 
   vTexCoord = texcoord;
   vWorldPosition = (model * vec4(position, 1.0)).xyz;
-  vWorldNormal = mat3(model) * normal;
+  mat3 normalMatrix = transpose(inverse(mat3(model)));
+  vWorldNormal = normalMatrix * normal;
 }
