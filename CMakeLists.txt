@@ -22,28 +22,18 @@ target_include_directories(stb_image SYSTEM PUBLIC third_party/stb)
 
 find_package(OpenGL REQUIRED)
 
-add_executable(dickman
-  "src/main.cpp"
-  "src/camera/Camera.cpp"
-  "src/camera/Camera.h"
-  "src/buffer/Buffer.cpp"
-  "src/buffer/Buffer.h"
-  "src/vertex_array/VertexArray.cpp"
-  "src/vertex_array/VertexArray.h"
-  "src/shader/Shader.cpp"
-  "src/shader/Shader.h"
-  "src/texture/Texture2D.cpp"
-  "src/texture/Texture2D.h"
-  "src/math/GraphicsMath.h"
-  "src/light/Light.h"
-  "src/light/Light.cpp"
+file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
 )
+add_executable(dickman ${PROJECT_SOURCES})
 target_link_libraries(dickman PRIVATE glfw glad stb_image OpenGL::GL)
 
 target_compile_features(dickman PRIVATE cxx_std_17)
 target_compile_definitions(dickman PRIVATE
   HELLO_SHADER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/shaders"
   HELLO_TEXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets/textures"
+  HELLO_MODELS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets/models"
 )
 file(GLOB_RECURSE SHADER_FILES CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
@@ -71,7 +61,10 @@ foreach(PROJECT_HEADER IN LISTS PROJECT_HEADERS)
   list(APPEND PROJECT_HEADER_DIRS "${PROJECT_HEADER_DIR}")
 endforeach()
 list(REMOVE_DUPLICATES PROJECT_HEADER_DIRS)
+target_sources(dickman PRIVATE ${PROJECT_HEADERS})
 target_include_directories(dickman PRIVATE ${PROJECT_HEADER_DIRS})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source" FILES
+  ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 # Windows 下默认输出到 build/Debug，DLL 版 glfw 会自动被拷贝
 if (MSVC)
