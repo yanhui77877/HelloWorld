@@ -1,6 +1,5 @@
 #include <iostream>
 #include <exception>
-#include <cstddef>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,6 +10,7 @@
 #include <Texture2D.h>
 #include <Light.h>
 #include <ObjLoader.h>
+#include <Mesh.h>
 
 void 
 glInit()
@@ -119,16 +119,7 @@ main()
         shader.setInt("specularMap", 1);
 
         std::vector<Vertex> vertex = loadObj(HELLO_MODELS_DIR "/pyramid.obj");
-        Buffer vertexBufferModel{ GL_ARRAY_BUFFER };
-        VertexArray vertexArrayModel;
-        vertexArrayModel.bind();
-        vertexBufferModel.upload(vertex.size()*sizeof(Vertex), vertex.data());
-        vertexArrayModel.setAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, position));
-        vertexArrayModel.setAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, u       ));
-        vertexArrayModel.setAttribute(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, normal  ));
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        VertexArray::unbind();
+        Mesh pyramid{vertex};
 
 
         Camera camera{Vec3{0.0f, 0.0f, 5.0f}};
@@ -245,8 +236,7 @@ main()
             shader.setVec3("secondLightPos", secondLight.getPosition());
             shader.setVec3("secondLightColour", secondLight.getColor());
             shader.setFloat("secondLightIntensity", secondLight.getIntensity());
-            vertexArrayModel.bind();
-            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertex.size()));
+            pyramid.draw();
 
             vertexArray.bind();
             //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
