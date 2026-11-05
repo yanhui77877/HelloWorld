@@ -134,8 +134,8 @@ main()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         VertexArray::unbind();
 
-        Texture2D texture{HELLO_TEXTURE_DIR "/uv-test.png"};
-        Texture2D specularTexture{HELLO_TEXTURE_DIR "/specular-mask.png"};
+        Texture2D texture{HELLO_TEXTURE_DIR "/uv-test.png", true, Texture2D::ColorSpace::SRGB};
+        Texture2D specularTexture{HELLO_TEXTURE_DIR "/specular-mask.png", true, Texture2D::ColorSpace::Linear};
         std::cout << "Texture loaded: " << texture.getWidth()<< "x" << texture.getHeight() << std::endl;
         shader.setInt("imageTexture", 0);
         shader.setInt("specularMap", 1);
@@ -310,6 +310,7 @@ main()
             glDisable(GL_CULL_FACE);
             glClear(GL_COLOR_BUFFER_BIT);
 
+            glDisable(GL_FRAMEBUFFER_SRGB);
             screenShader.use();
             sceneFramebuffer.bindColorTexture(0);
             screenShader.setInt("screenTexture", 0);

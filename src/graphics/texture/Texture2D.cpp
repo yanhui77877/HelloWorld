@@ -6,7 +6,8 @@
 #include <utility>
 
 Texture2D::Texture2D(const std::string& path, 
-                     bool flipVertically)
+                     bool flipVertically,
+                     ColorSpace colorSpace)
     : id(0), 
       width(0), 
       height(0)
@@ -42,7 +43,8 @@ Texture2D::Texture2D(const std::string& path,
     setWrapping(GL_REPEAT, GL_REPEAT);
 
     glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA8,
+        GL_TEXTURE_2D, 0,
+        colorSpace == ColorSpace::SRGB ? GL_SRGB8_ALPHA8 : GL_RGBA8,
         width, height, 0,
         GL_RGBA, GL_UNSIGNED_BYTE, pixels.get()
     );

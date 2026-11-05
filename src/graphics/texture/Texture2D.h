@@ -10,8 +10,15 @@ class Texture2D
     int height;
 
 public:
+    enum class ColorSpace
+    {
+        Linear,
+        SRGB
+    };
+
     explicit Texture2D(const std::string& path, 
-                       bool flipVertically = true);
+                       bool flipVertically = true,
+                       ColorSpace colorSpace = ColorSpace::Linear);
     ~Texture2D();
 
     Texture2D(const Texture2D&) = delete;
