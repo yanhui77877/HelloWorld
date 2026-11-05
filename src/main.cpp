@@ -1,5 +1,6 @@
 #include <iostream>
 #include <exception>
+#include <stdexcept>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,6 +12,7 @@
 #include <Light.h>
 #include <ObjLoader.h>
 #include <Mesh.h>
+#include <Framebuffer.h>
 
 void 
 glInit()
@@ -51,6 +53,26 @@ main()
     {
         Shader shader{ HELLO_SHADER_DIR "/basic.vert", HELLO_SHADER_DIR "/basic.frag" };
         Shader lightShader{ HELLO_SHADER_DIR "/light.vert", HELLO_SHADER_DIR "/light.frag" };
+        Shader screenShader{ HELLO_SHADER_DIR "/screen.vert", HELLO_SHADER_DIR "/screen.frag" };
+
+        Framebuffer sceneFramebuffer;
+
+        const float screenVertices[] = {
+            -1.0f, -1.0f, 0.0f, 0.0f,
+             1.0f, -1.0f, 1.0f, 0.0f,
+             1.0f,  1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 1.0f, 1.0f,
+            -1.0f,  1.0f, 0.0f, 1.0f
+        };
+
+        Buffer screenVBO{GL_ARRAY_BUFFER};
+        VertexArray screenVAO;
+        screenVAO.bind();
+        screenVBO.upload(sizeof(screenVertices), screenVertices);
+        screenVAO.setAttribute(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
+        screenVAO.setAttribute(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 2*sizeof(float));
+        VertexArray::unbind();
 
         GLuint indices[] =
         {
@@ -132,16 +154,35 @@ main()
         double lastMouseY = 0.0;
         bool firstMouse = true;
         bool reloadWasPressed = false;
+        int effectMode = 0;
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glFrontFace(GL_CCW);
 
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
+
+            int previousEffect = effectMode;
+            for (int mode = 0; mode < 5; ++mode)
+            {
+                if (glfwGetKey(window, GLFW_KEY_1 + mode) == GLFW_PRESS)
+                    effectMode = mode;
+            }
+
+            if (effectMode != previousEffect)
+            {
+                const char* names[] = { "Original", "Invert", "Grayscale", "Gaussian blur", "Sharpen" };
+                std::cout << "Post-process: " << names[effectMode] << std::endl;
+            }
 
             bool reloadPressed = glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS;
             if (reloadPressed && !reloadWasPressed)
             {
                 shader.reload();
                 lightShader.reload();
+                screenShader.reload();
             }
             reloadWasPressed = reloadPressed;
 
@@ -199,6 +240,15 @@ main()
 
             camera.move(forwardInput, rightInput, deltaTime);
 
+            glfwGetFramebufferSize(window, &width, &height);
+            if (width == 0 || height == 0)
+                continue;
+
+            sceneFramebuffer.resize(width, height);
+            sceneFramebuffer.bind();
+
+            glViewport(0, 0, width, height);
+            glEnable(GL_CULL_FACE);
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -206,6 +256,7 @@ main()
             shader.use();
 
             float t = (float)glfwGetTime();
+            //Mat4 model = Mat4::scale(2.0f, 1.0f, 0.5f);
             Mat4 model = Mat4::identity();
             //Mat4 model = Mat4::multiply(
             //    Mat4::rotateY(t),
@@ -214,7 +265,7 @@ main()
             Mat4 view = camera.getViewMatrix();
             Mat4 projection = Mat4::perspective(
                 45.0f * 3.14159265f / 180.0f,
-                800.0f / 600.0f,
+                static_cast<float>(width) / static_cast<float>(height),
                 0.1f,
                 100.0f
             );
@@ -252,6 +303,21 @@ main()
             }
 
             VertexArray::unbind();
+
+            Framebuffer::bindDefault();
+            glViewport(0, 0, width, height);
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            screenShader.use();
+            sceneFramebuffer.bindColorTexture(0);
+            screenShader.setInt("screenTexture", 0);
+            screenShader.setInt("effectMode", effectMode);
+            screenVAO.bind();
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            VertexArray::unbind();
+
             glfwSwapBuffers(window);
         }
     }
