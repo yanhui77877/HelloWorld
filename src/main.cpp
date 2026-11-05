@@ -1,6 +1,8 @@
 #include <iostream>
 #include <exception>
 #include <stdexcept>
+#include <algorithm>
+#include <cmath>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -154,6 +156,7 @@ main()
         double lastMouseY = 0.0;
         bool firstMouse = true;
         bool reloadWasPressed = false;
+        float exposure = 1.0f;
         int effectMode = 0;
 
         glEnable(GL_CULL_FACE);
@@ -200,6 +203,12 @@ main()
 
             float deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
+
+            if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+                exposure *= std::exp(deltaTime);
+            if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+                exposure *= std::exp(-deltaTime);
+            exposure = std::clamp(exposure, 0.05f, 20.0f);
 
             double mouseX;
             double mouseY;
@@ -315,6 +324,7 @@ main()
             sceneFramebuffer.bindColorTexture(0);
             screenShader.setInt("screenTexture", 0);
             screenShader.setInt("effectMode", effectMode);
+            screenShader.setFloat("exposure", exposure);
             screenVAO.bind();
             glDrawArrays(GL_TRIANGLES, 0, 6);
             VertexArray::unbind();

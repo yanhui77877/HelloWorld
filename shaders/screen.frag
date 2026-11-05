@@ -3,6 +3,7 @@
 in vec2 uv;
 uniform sampler2D screenTexture;
 uniform int effectMode;
+uniform float exposure;
 out vec4 color;
 
 vec3
@@ -17,7 +18,6 @@ void
 main()
 {
     vec3 hdrColor = texture(screenTexture, uv).rgb;
-float exposure = 4.0;
 
 vec3 exposedColor = hdrColor * exposure;
 
